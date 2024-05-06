@@ -23,8 +23,8 @@ class _ProductsPageState extends State<ProductsPage> {
   }
 
   Future<void> _fetchProducts() async {
-    final response = await http
-        .get(Uri.parse('https://localhost:44301/api/Product/GetAllProducts'));
+    final response = await http.get(Uri.parse(
+        'https://uiexercise.theproindia.com/api/Product/GetAllProduct'));
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
@@ -42,6 +42,8 @@ class _ProductsPageState extends State<ProductsPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Products'),
+        titleTextStyle: const TextStyle(
+            color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
         backgroundColor: primaryColor,
         actions: [
           IconButton(
@@ -109,7 +111,7 @@ class _ProductsPageState extends State<ProductsPage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              product.productName,
+                              "${products[index].ProductName}    Quantity:${products[index].Quantity}",
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
@@ -162,24 +164,23 @@ class _ProductsPageState extends State<ProductsPage> {
 }
 
 class Product {
-  //final String productId;
-  final String productName;
-  final int quantity;
-  //final bool IsActive;
+  final String ProductId;
+  final String ProductName;
+  final int Quantity;
+  final bool IsActive;
 
-  Product({
-    //required this.productId,
-    required this.productName,
-    required this.quantity,
-    //required this.IsActive
-  });
+  Product(
+      {required this.ProductId,
+      required this.ProductName,
+      required this.Quantity,
+      required this.IsActive});
 
   factory Product.fromJson(Map<String, dynamic> json) {
     return Product(
-      productName: json['productName'] ?? '',
-      quantity: json['quantity'] ?? 0,
-      //productId: json['productId'],
-      //IsActive: json['IsActive'],
+      ProductName: json['ProductName'] ?? '',
+      Quantity: json['Quantity'] ?? 0,
+      ProductId: json['ProductId'] ?? '',
+      IsActive: json['IsActive'],
     );
   }
 }

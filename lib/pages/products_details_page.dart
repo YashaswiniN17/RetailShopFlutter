@@ -1,9 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:onlineshopping/pages/products.dart';
 
 class ProductDetailsPage extends StatefulWidget {
   final Product product;
+  // final Quantity = TextEditingController();
 
   const ProductDetailsPage({Key? key, required this.product}) : super(key: key);
 
@@ -19,7 +22,9 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.product.productName),
+        title: Text(widget.product.ProductName),
+        titleTextStyle: const TextStyle(
+            color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
         backgroundColor: Colors.teal,
       ),
       body: SingleChildScrollView(
@@ -43,6 +48,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
             //   style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
             // ),
             SizedBox(height: 8.0),
+            Text(widget.product.ProductName),
             Text(
               'Select the quantity to be ordered.',
               textAlign: TextAlign.justify,
@@ -51,10 +57,10 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
             Row(
               children: [
                 Text(
-                  'Quantity:',
+                  'Quantity',
                   style: TextStyle(fontSize: 16.0),
                 ),
-                Spacer(),
+                //Spacer(),
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -70,13 +76,13 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                     ),
                     Text('$selectedQuantity'),
                     Text(
-                      ' / ${widget.product.quantity}',
+                      ' / ${widget.product.Quantity}',
                       style: TextStyle(fontSize: 16.0),
                     ),
                     IconButton(
                       icon: Icon(Icons.add),
                       onPressed: () {
-                        if (selectedQuantity < widget.product.quantity) {
+                        if (selectedQuantity < widget.product.Quantity) {
                           setState(() {
                             selectedQuantity++;
                           });
@@ -84,7 +90,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
-                                'Maximum quantity reached: ${widget.product.quantity}',
+                                'Maximum quantity reached: ${widget.product.Quantity}',
                               ),
                               backgroundColor: Colors.orange,
                             ),
@@ -101,11 +107,11 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
               onPressed: _isOrderPlaced
                   ? null
                   : () async {
-                      if (selectedQuantity > widget.product.quantity) {
+                      if (selectedQuantity > widget.product.Quantity) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
-                              'Quantity exceeded! Available quantity: ${widget.product.quantity}',
+                              'Quantity exceeded! Available quantity: ${widget.product.Quantity}',
                             ),
                             backgroundColor: Colors.red,
                           ),
@@ -115,11 +121,15 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
 
                       final response = await http.post(
                         Uri.parse(
-                            'https://localhost:44301/api/OrderProduct/AddOrder'),
-                        body: {
-                          'productName': widget.product.productName.toString(),
-                          'quantity': selectedQuantity.toString(),
+                            'https://uiexercise.theproindia.com/api/Order/AddOrder'),
+                        headers: <String, String>{
+                          'Content-Type': 'application/json; charset=UTF-8'
                         },
+                        body: jsonEncode(<String, dynamic>{
+                          "customerId": "d9d30672-54f3-44d7-146a-08dc44b61636",
+                          "productId": widget.product.ProductId,
+                          "quantity": selectedQuantity,
+                        }),
                       );
 
                       if (response.statusCode == 200 ||
@@ -144,6 +154,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                     },
               child: Text('Buy Now'),
               style: ElevatedButton.styleFrom(
+                alignment: Alignment.center,
                 backgroundColor: Colors.teal,
               ),
             ),

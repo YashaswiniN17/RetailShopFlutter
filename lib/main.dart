@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:onlineshopping/pages/products.dart';
 import 'package:provider/provider.dart';
-import 'package:onlineshopping/pages/home_page.dart';
+//import 'package:onlineshopping/pages/home_page.dart';
 import 'package:onlineshopping/themes/theme_provider.dart';
 
 void main() {
@@ -17,7 +18,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: HomePage(),
+      home: ProductsPage(),
       theme: Provider.of<ThemeProvider>(context).themeData,
     );
   }
