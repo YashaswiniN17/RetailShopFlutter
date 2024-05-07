@@ -121,6 +121,7 @@ class _AddProductPageState extends State<AddProductPage> {
                     child: Text('Add Product'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.teal,
+                      foregroundColor: Colors.white,
                     ),
                   ),
                 ],

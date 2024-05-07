@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:onlineshopping/pages/add_product_page.dart';
@@ -12,14 +11,19 @@ class ProductsPage extends StatefulWidget {
 
 class _ProductsPageState extends State<ProductsPage> {
   List<Product> products = [];
+  List<Product> filteredProducts = [];
   final Color backgroundColor = Colors.purpleAccent.shade100;
   final Color cardColor = Colors.white;
   final Color primaryColor = Colors.teal;
+
+  TextEditingController _searchController = TextEditingController();
+  bool _isSearching = false;
 
   @override
   void initState() {
     super.initState();
     _fetchProducts();
+    _searchController.addListener(_searchProducts);
   }
 
   Future<void> _fetchProducts() async {
@@ -31,48 +35,93 @@ class _ProductsPageState extends State<ProductsPage> {
       setState(() {
         products =
             (data as List).map((item) => Product.fromJson(item)).toList();
+        filteredProducts = List.from(products);
       });
     } else {
       print('Error fetching products');
     }
   }
 
+  void _searchProducts() {
+    String query = _searchController.text.toLowerCase();
+    setState(() {
+      filteredProducts = products
+          .where((product) => product.ProductName.toLowerCase().contains(query))
+          .toList();
+    });
+  }
+
+  void _toggleSearch() {
+    setState(() {
+      _isSearching = !_isSearching;
+      if (!_isSearching) {
+        _searchController.clear();
+        filteredProducts = List.from(products);
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Products'),
-        titleTextStyle: const TextStyle(
+        title: _isSearching
+            ? TextField(
+                controller: _searchController,
+                decoration: InputDecoration(
+                  hintText: 'Search products...',
+                  border: InputBorder.none,
+                  hintStyle: TextStyle(color: Colors.white),
+                ),
+                style: TextStyle(color: Colors.white),
+              )
+            : Text('Products'),
+        titleTextStyle: TextStyle(
             color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
         backgroundColor: primaryColor,
         actions: [
           IconButton(
-            icon: Icon(Icons.add),
+            icon: Icon(_isSearching ? Icons.close : Icons.search),
+            color: Colors.white,
+            onPressed: _toggleSearch,
+          ),
+          TextButton.icon(
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => AddProductPage(),
-                ),
+                MaterialPageRoute(builder: (context) => AddProductPage()),
               );
             },
+            icon: Icon(
+              Icons.add,
+              color: Colors.white,
+            ),
+            label: Text(
+              'Add',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16.0,
+              ),
+            ),
           ),
         ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(10.0),
         child: ListView.builder(
-          itemCount: products.length,
+          itemCount: filteredProducts.length,
           itemBuilder: (context, index) {
-            final product = products[index];
+            final product = filteredProducts[index];
             return InkWell(
-              onTap: () {
+              onTap: () async {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => ProductDetailsPage(product: product),
                   ),
-                );
+                ).then((value) {
+                  _fetchProducts();
+                });
               },
               child: Container(
                 margin: EdgeInsets.symmetric(vertical: 5.0),
@@ -93,16 +142,13 @@ class _ProductsPageState extends State<ProductsPage> {
                     children: [
                       ClipRRect(
                         borderRadius: BorderRadius.circular(10.0),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(10.0),
-                          child: Image.asset(
-                            'lib/assets/products.png',
-                            width: 80.0,
-                            height: 80.0,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) =>
-                                Center(child: Icon(Icons.error)),
-                          ),
+                        child: Image.asset(
+                          'lib/assets/products.png',
+                          width: 80.0,
+                          height: 80.0,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) =>
+                              Center(child: Icon(Icons.error)),
                         ),
                       ),
                       SizedBox(width: 10.0),
@@ -111,7 +157,7 @@ class _ProductsPageState extends State<ProductsPage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              "${products[index].ProductName}    Quantity:${products[index].Quantity}",
+                              "${product.ProductName}      Quantity:${product.Quantity}",
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
@@ -169,18 +215,19 @@ class Product {
   final int Quantity;
   final bool IsActive;
 
-  Product(
-      {required this.ProductId,
-      required this.ProductName,
-      required this.Quantity,
-      required this.IsActive});
+  Product({
+    required this.ProductId,
+    required this.ProductName,
+    required this.Quantity,
+    required this.IsActive,
+  });
 
   factory Product.fromJson(Map<String, dynamic> json) {
     return Product(
       ProductName: json['ProductName'] ?? '',
       Quantity: json['Quantity'] ?? 0,
       ProductId: json['ProductId'] ?? '',
-      IsActive: json['IsActive'],
+      IsActive: json['IsActive'] ?? false,
     );
   }
 }

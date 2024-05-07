@@ -143,6 +143,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                             backgroundColor: Colors.green,
                           ),
                         );
+                        Navigator.pop(context, true);
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
@@ -156,6 +157,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
               style: ElevatedButton.styleFrom(
                 alignment: Alignment.center,
                 backgroundColor: Colors.teal,
+                foregroundColor: Colors.white,
               ),
             ),
           ],
